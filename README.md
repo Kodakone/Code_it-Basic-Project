@@ -67,8 +67,15 @@ Weekdays
 ## Version 
 
 > Python: 3.13.9
-> Numpy
-> Pandas
-> OpenCV
-> Pytorch
-> ?
+
+> jupyter>=1.1.1
+
+> matplotlib>=3.10.8
+
+> numpy>=2.4.1
+
+> pandas>=3.0.0
+
+> scikit-learn>=1.8.0
+
+> torch>=2.10.0

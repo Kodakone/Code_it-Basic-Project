@@ -6,4 +6,5 @@ def hello():
 
 
     print("Shin")
-    
+    print("Hi")
+    print("hi2")

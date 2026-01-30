@@ -9,3 +9,8 @@ wheels/
 # Virtual environments
 .venv
 .env
+
+# cache / intermediate files
+cache/
+*.cache
+*.jsonl

@@ -24,6 +24,7 @@ Code_it 7기 초급 프로젝트
 - **폴더 구조**: 
 데이터 Folder 구조 구성 
 
+```
 ├── Dataset
 │   ├── sprint_ai_project1_data
 │   │   │── train_images                # 원본 train images
@@ -36,7 +37,7 @@ Code_it 7기 초급 프로젝트
     ├── main.py
     ├── REAMME.py
     ├── ...
-
+```
 
 코드, 모델, 결과 등 주요 디렉토리 구조를 그림 또는 리스트 형태로 작성
 

@@ -1,6 +1,7 @@
 # Python-generated files
 __pycache__/
 *.py[oc]
+*.pyc
 build/
 dist/
 wheels/
@@ -15,7 +16,10 @@ cache/
 *.cache
 *.jsonl
 
-# env (loacl only)
+# env (local only)
 .env
 .env.*
 !.env.example
+
+# Data 원본 (local only)
+data/

@@ -293,43 +293,44 @@ def build_yolo_dataset(
     print("nc:", len(cls_to_name))
     return train_fnames, val_fnames, catid_to_cls, cls_to_name    
 
-# # ============================================================================
-# # v1 scaffold 만들기(v0 복사+증강본 추가용) ----------------------------------
-# def make_aug_scaffold(v0_root: Path, v1_root: Path, cls_to_name: list[str], force: bool = False):
-#     if v1_root.exists() and any(v1_root.iterdir()) and not force:
-#         print(f"[v1] already exists and not empty: {v1_root}")
-#         print("[v1] scaffold step skipped (set force=True to override).")
-#         return
+# ============================================================================
+# v1 scaffold 만들기(v0 복사+증강본 추가용) ----------------------------------
+def make_aug_scaffold(v0_root: Path, v1_root: Path, cls_to_name: list[str], force: bool = False):
+    if v1_root.exists() and any(v1_root.iterdir()) and not force:
+        print(f"[v1] already exists and not empty: {v1_root}")
+        print("[v1] scaffold step skipped (set force=True to override).")
+        return
     
-#     if force and v1_root.exists():
-#         shutil.rmtree(v1_root)
+    if force and v1_root.exists():
+        shutil.rmtree(v1_root)
 
-#     for sub in [
-#         "images/train",
-#         "images/val",
-#         "labels/train",
-#         "labels/val",
-#     ]:
-#         (v1_root / sub).mkdir(parents=True, exist_ok=True)
+    for sub in [
+        "images/train",
+        "images/val",
+        "labels/train",
+        "labels/val",
+    ]:
+        (v1_root / sub).mkdir(parents=True, exist_ok=True)
 
-#     # 이미지/라벨복사
-#     def copy_all(src: Path, dst: Path):
-#         for p in src.iterdir():
-#             if p.is_file():
-#                 shutil.copy2(p, dst / p.name)
+    # 이미지/라벨복사
+    def copy_all(src: Path, dst: Path):
+        for p in src.iterdir():
+            if p.is_file():
+                shutil.copy2(p, dst / p.name)
 
-#     # train/val 이미지/라벨 복사
-#     copy_all(v0_root / "images/train", v1_root / "images/train")
-#     copy_all(v0_root / "labels/train", v1_root / "labels/train")
-#     copy_all(v0_root / "images/val",   v1_root / "images/val")
-#     copy_all(v0_root / "labels/val",   v1_root / "labels/val")
+    # train/val 이미지/라벨 복사
+    copy_all(v0_root / "images/train", v1_root / "images/train")
+    copy_all(v0_root / "labels/train", v1_root / "labels/train")
+    copy_all(v0_root / "images/val",   v1_root / "images/val")
+    copy_all(v0_root / "labels/val",   v1_root / "labels/val")
     
-#     # v1용 dataset.yaml 생성
-#     write_dataset_yaml(v1_root, cls_to_name)
-#     print("v1 dataset scaffold created (no augmentation)")
+    # v1용 dataset.yaml 생성
+    write_dataset_yaml(v1_root, cls_to_name)
+    print("v1 dataset scaffold created (no augmentation)")
 
-# # 이후 증강이미지는 yolo_dataset_aug에 저장해야함(원본복사본 포함되어있음).
-# # yolo_dataset에는 원본만 있음.
+# 이후 증강이미지는 yolo_dataset_aug에 저장해야함(원본복사본 포함되어있음).
+# yolo_dataset에는 원본만 있음.
+# ============================================================================
 
 # 디버그 유틸 ----------------------------------
 def compute_max_class_id(labels_root: Path) -> int:
@@ -364,13 +365,18 @@ print("val labels  :", len(list((V0_ROOT /'labels/val').glob('*.txt'))))
 max_id = compute_max_class_id(V0_ROOT  / "labels")
 print("max class_id:", max_id, "| expected:", len(cls_to_name) - 1)
 
-# # ===========================================================
-# # v1 scaffold (최초 1회만) ----------------------------------
-# V1_ROOT = DATA_ROOT / "yolo_dataset_aug"
+# ===========================================================
+# v1 scaffold (최초 1회만) ----------------------------------
+V1_ROOT = DATA_ROOT / "yolo_dataset_aug"
 
-# make_aug_scaffold(
-#     v0_root=V0_ROOT,
-#     v1_root=V1_ROOT,
-#     cls_to_name=cls_to_name,
-#     force=False,   # 기본 False: 이미 존재하면 스킵
-# )
+make_aug_scaffold(
+    v0_root=V0_ROOT,
+    v1_root=V1_ROOT,
+    cls_to_name=cls_to_name,
+    force=False,   # 기본 False: 이미 존재하면 스킵
+)
+print("aug_train images:", len(list((V1_ROOT /'images/train').glob('*.png'))))
+print("aug_val images  :", len(list((V1_ROOT /'images/val').glob('*.png'))))
+print("aug_train labels:", len(list((V1_ROOT /'labels/train').glob('*.txt'))))
+print("aug_val labels  :", len(list((V1_ROOT /'labels/val').glob('*.txt'))))
+# ============================================================================

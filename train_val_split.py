@@ -74,7 +74,7 @@ def multilabel_train_val_split(
 
     # split 위한 멀티라벨 행렬은 "catid 기준"으로 만들어도 됨
     all_cat_ids = sorted({
-        label
+        int(label)
         for t in targets_by_filename.values()
         for label in t["labels"]
     })
@@ -109,7 +109,7 @@ def build_yolo_class_mapping(
     split_fnames = train_fnames + val_fnames
 
     all_cat_ids = sorted({
-        label
+        int(label)
         for f in split_fnames
         for label in targets_by_filename[f]["labels"]
     })
@@ -189,6 +189,11 @@ def save_split_labels_yolo(
         catids = [int(c) for c in tgt["labels"]]
 
         # catid -> yolo cls id
+        keep = [c in catid_to_cls for c in catids]
+        if any(not k for k in keep):
+            boxes = [b for b, k in zip(boxes, keep) if k]
+            catids = [c for c, k in zip(catids, keep) if k]
+
         cls_ids = [catid_to_cls[c] for c in catids]
 
         out_txt = out_lbl_dir / (Path(fname).stem + ".txt")
@@ -196,15 +201,17 @@ def save_split_labels_yolo(
 
 # dataset.yaml 생성 ----------------------------------
 def write_dataset_yaml(output_root: Path, names: list[str]):
+    names_dict = {i: n for i, n in enumerate(names)}
     data_yaml = {
         "path": str(output_root),
         "train": "images/train",
         "val": "images/val",
-        "names": names,
+        "names": names_dict,
     }
     yaml_path = output_root / "dataset.yaml"
     with open(yaml_path, "w", encoding="utf-8") as f:
         yaml.dump(data_yaml, f, allow_unicode=True, sort_keys=False)
+
     print("[dataset.yaml] saved:", yaml_path)
     print("[dataset.yaml] nc:", len(names))
 
@@ -215,7 +222,10 @@ def build_yolo_dataset(
     categoryid_to_name: dict,
     val_ratio: float = 0.33,
     seed: int = 42,
+    clean_output: bool = True,
 ):
+    if clean_output and OUTPUT_ROOT.exists():
+        shutil.rmtree(OUTPUT_ROOT)
     # 폴더 생성
     (OUTPUT_ROOT / "images" / "train").mkdir(parents=True, exist_ok=True)
     (OUTPUT_ROOT / "images" / "val").mkdir(parents=True, exist_ok=True)
@@ -283,26 +293,84 @@ def build_yolo_dataset(
     print("nc:", len(cls_to_name))
     return train_fnames, val_fnames, catid_to_cls, cls_to_name    
 
+# # ============================================================================
+# # v1 scaffold 만들기(v0 복사+증강본 추가용) ----------------------------------
+# def make_aug_scaffold(v0_root: Path, v1_root: Path, cls_to_name: list[str], force: bool = False):
+#     if v1_root.exists() and any(v1_root.iterdir()) and not force:
+#         print(f"[v1] already exists and not empty: {v1_root}")
+#         print("[v1] scaffold step skipped (set force=True to override).")
+#         return
+    
+#     if force and v1_root.exists():
+#         shutil.rmtree(v1_root)
+
+#     for sub in [
+#         "images/train",
+#         "images/val",
+#         "labels/train",
+#         "labels/val",
+#     ]:
+#         (v1_root / sub).mkdir(parents=True, exist_ok=True)
+
+#     # 이미지/라벨복사
+#     def copy_all(src: Path, dst: Path):
+#         for p in src.iterdir():
+#             if p.is_file():
+#                 shutil.copy2(p, dst / p.name)
+
+#     # train/val 이미지/라벨 복사
+#     copy_all(v0_root / "images/train", v1_root / "images/train")
+#     copy_all(v0_root / "labels/train", v1_root / "labels/train")
+#     copy_all(v0_root / "images/val",   v1_root / "images/val")
+#     copy_all(v0_root / "labels/val",   v1_root / "labels/val")
+    
+#     # v1용 dataset.yaml 생성
+#     write_dataset_yaml(v1_root, cls_to_name)
+#     print("v1 dataset scaffold created (no augmentation)")
+
+# # 이후 증강이미지는 yolo_dataset_aug에 저장해야함(원본복사본 포함되어있음).
+# # yolo_dataset에는 원본만 있음.
+
+# 디버그 유틸 ----------------------------------
+def compute_max_class_id(labels_root: Path) -> int:
+    max_id = -1
+    for p in list((labels_root / "train").glob("*.txt")) + list((labels_root / "val").glob("*.txt")):
+        for line in p.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            cls = int(line.split()[0])
+            if cls > max_id:
+                max_id = cls
+    return max_id
+
 # 실행! ----------------------------------
-OUTPUT_ROOT = DATA_ROOT / "yolo_dataset"
+V0_ROOT  = DATA_ROOT / "yolo_dataset"
 IMG_DIR = TRAIN_IMG_DIR
 
-build_yolo_dataset(
-    OUTPUT_ROOT=OUTPUT_ROOT,
+train_fnames, val_fnames, catid_to_cls, cls_to_name = build_yolo_dataset(
+    OUTPUT_ROOT=V0_ROOT ,
     IMG_DIR=IMG_DIR,
     targets_by_filename=targets_by_filename,
     categoryid_to_name=categoryid_to_name,
     val_ratio=0.33,
-    seed=42
+    seed=42,
+    clean_output=True,
 )
-print("train images:", len(list((OUTPUT_ROOT/'images/train').glob('*.png'))))
-print("val images  :", len(list((OUTPUT_ROOT/'images/val').glob('*.png'))))
-print("train labels:", len(list((OUTPUT_ROOT/'labels/train').glob('*.txt'))))
-print("val labels  :", len(list((OUTPUT_ROOT/'labels/val').glob('*.txt'))))
+print("train images:", len(list((V0_ROOT /'images/train').glob('*.png'))))
+print("val images  :", len(list((V0_ROOT /'images/val').glob('*.png'))))
+print("train labels:", len(list((V0_ROOT /'labels/train').glob('*.txt'))))
+print("val labels  :", len(list((V0_ROOT /'labels/val').glob('*.txt'))))
 
-max_id = max(
-    int(line.split()[0])
-    for p in (OUTPUT_ROOT / "labels/train").glob("*.txt")
-    for line in p.read_text().splitlines()
-)
+max_id = compute_max_class_id(V0_ROOT  / "labels")
+print("max class_id:", max_id, "| expected:", len(cls_to_name) - 1)
 
+# # ===========================================================
+# # v1 scaffold (최초 1회만) ----------------------------------
+# V1_ROOT = DATA_ROOT / "yolo_dataset_aug"
+
+# make_aug_scaffold(
+#     v0_root=V0_ROOT,
+#     v1_root=V1_ROOT,
+#     cls_to_name=cls_to_name,
+#     force=False,   # 기본 False: 이미 존재하면 스킵
+# )

@@ -22,5 +22,6 @@ cache/
 !.env.example
 
 # Data 원본 (local only)
+Data/
 data/
 runs/

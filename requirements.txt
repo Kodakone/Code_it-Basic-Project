@@ -5,3 +5,6 @@ scikit-learn
 jupyter
 torch
 iterative-stratification
+tqdm
+opencv-python
+albumentations

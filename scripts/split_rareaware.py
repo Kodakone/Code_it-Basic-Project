@@ -158,7 +158,7 @@ def main():
 
     labels_by_file = extract_multilabels(targets)
 
-    # ✅ 여기만 네 split 규칙으로 교체하면 됨
+    # ✅ 여기만 정한 split 규칙으로 교체하면 됨
     train_files, val_files = split_strategy_masterlist(labels_by_file, seed=42, val_ratio=0.33)
 
     summary = summarize_split(labels_by_file, train_files, val_files)

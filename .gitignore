@@ -23,7 +23,7 @@ cache/
 
 # Data 원본 (local only) < data/** 폴더 자체는 유지하되 내부 파일만 무시
 data/**/*
-!data/읽어주세요.txt
+!data/README_data.md
 !data/raw/
 !data/yolo_dataset/
 !data/yolo_dataset_aug/

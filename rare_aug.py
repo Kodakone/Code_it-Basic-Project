@@ -489,6 +489,22 @@ for cid in sorted(rare_safe_set):
         f"{class_freq.get(cls, 0)} bboxes"
     )
     
+# png/txt 1:1 일치체크
+IMG_DIR = Path("yolo_dataset_aug/images/train")
+LBL_DIR = Path("yolo_dataset_aug/labels/train")
+
+img_stems = {p.stem for p in IMG_DIR.glob("*.png")}
+lbl_stems = {p.stem for p in LBL_DIR.glob("*.txt")}
+only_img = sorted(img_stems - lbl_stems)
+only_lbl = sorted(lbl_stems - img_stems)
+
+print(f"\nonly image: {len(only_img)}")
+for s in only_img[:20]:
+    print("  ", s)
+print(f"only label: {len(only_lbl)}")
+for s in only_lbl[:20]:
+    print("  ", s)
+
 yaml_path = V1_ROOT / "dataset.yaml"
 assert yaml_path.exists(), "dataset.yaml 이 없습니다. split_yolo.py를 먼저 실행하세요."
 print("dataset.yaml OK:", yaml_path)

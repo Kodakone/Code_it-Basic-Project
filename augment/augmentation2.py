@@ -1,16 +1,14 @@
-import sys
 from pathlib import Path
-
-REPO_ROOT = Path(__file__).resolve().parents[1]  # Code_it-Basic-Project
-sys.path.insert(0, str(REPO_ROOT))
-
-from dataloader.dataset_load import DATA_ROOT, CACHE_DIR # 윗줄들과 순서바뀌면 에러
 import json
+import shutil
+import yaml
+from PIL import Image
 from collections import defaultdict, Counter
 from tqdm import tqdm
 import random
 
 import numpy as np
+from iterstrat.ml_stratifiers import MultilabelStratifiedShuffleSplit
 import albumentations as A
 import cv2
 import numpy as np
@@ -226,9 +224,10 @@ for fname in train_fnames:
         safe_img_to_hits[fname] = hits
 
 # 희귀클래스 증강대상 이미지
-aug_img_set = safe_img_set - top_img_set
+# aug_img_set = safe_img_set - top_img_set
+aug_img_set = safe_img_set
 
-# 중위클래스 조건부증강대상 이미지
+# 중위클래스 조건부증강대상 이미지(희귀클래스와 함께 등장하지 않은 이미지들만 대상)
 cond_mid_img_set = mid_img_set - safe_img_set - top_img_set
 
 print("safe_img_set:", len(safe_img_set))      
@@ -327,8 +326,9 @@ attempted = 0   # 증강 시도 수
 saved = 0       # 실제 저장 수
 skipped_empty = 0
 skipped_no_safe = 0
-MAX_ADD_3351_IMGS = 5  # 3351 포함 증강본은 최대 5장까지만 허용
-added_3351_imgs = 0    # rare가 3351클래스 등장이미지 얼마나 올리나 추적용
+MAX_ADD_3351_IMGS = 5     # 3351 포함 증강본은 최대 5장까지만 허용
+added_3351_imgs = 0       # rare가 3351클래스 등장이미지 얼마나 올리나 추적용
+seen_rare_with_head = 0   # 3351클래스와 등장하는 이미지추적용
 skipped_rare_due_to_head = 0  # 3351증가돼서 증강실패한 이미지갯수 추적용
 skipped_mid_due_to_head = 0
 
@@ -415,6 +415,8 @@ for fname in tqdm(sorted(train_fnames), desc="TRAIN preprocess"):
             skipped_no_safe += 1
             continue
 
+        # 도움된다 = 증강될 때 아직 목표에 못미친 클래스의 bbox를 최소 하나이상 증가시키는가
+        # 목표 = TARGET_RARE_BBOX, TARGET_MID_BBOX
         # cond_mid는 부족한 mid 클래스에 실제로 도움되는 경우만 저장
         if fname in cond_mid_img_set:
             if not any((cid in underfilled_mid_set) for cid in final_catids_set):
@@ -426,18 +428,19 @@ for fname in tqdm(sorted(train_fnames), desc="TRAIN preprocess"):
                 continue
 
         elif fname in aug_img_set:
-            # head(3351)가 포함된 rare수 파악
-            if (final_catids_set & head_catids) or (final_catids_set & always_with_3351):
-                skipped_rare_due_to_head += 1
-
-            # rare 목표(예: TARGET_RARE_BBOX) 미달 클래스가 포함될 때만 저장
+            # rare 목표(TARGET_RARE_BBOX) 미달 클래스에 도움될 될 때만 저장
             if not any((cid in rare_safe_set and cur_bbox_count[cid] < target_bbox_count[cid]) for cid in final_catids_set):
                 continue
-                
+
+            # 3351 cap 초과해 실제 저장 실패수 파악
             if 3351 in final_catids_set:
                 if added_3351_imgs >= MAX_ADD_3351_IMGS:
                     skipped_rare_due_to_head += 1  # cap 때문에 저장 실패한 횟수
                     continue
+
+            # head(3351)가 포함된 rare수 파악
+            if (final_catids_set & head_catids) or (final_catids_set & always_with_3351):
+                seen_rare_with_head += 1
         else:
             continue
 
@@ -489,6 +492,7 @@ print("saved:", saved)
 print("skip empty bbox:", skipped_empty)
 print("skip no safe:", skipped_no_safe)
 print("added_3351_imgs:", added_3351_imgs)
+print("seen_rare_with_head:", seen_rare_with_head)
 print("skipped rare due to head:", skipped_rare_due_to_head)
 print("skipped mid due to head/cooccur:", skipped_mid_due_to_head)
 underfilled_mid_set_after = get_underfilled_mid_set(cur_bbox_count, target_bbox_count, mid_class_set)

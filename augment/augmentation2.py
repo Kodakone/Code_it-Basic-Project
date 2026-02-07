@@ -1,14 +1,14 @@
+import sys
 from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[1]  # Code_it-Basic-Project
+sys.path.insert(0, str(REPO_ROOT))
+from dataloader.dataset_load import DATA_ROOT, CACHE_DIR # 윗줄들과 순서바뀌면 에러
+
 import json
-import shutil
-import yaml
-from PIL import Image
 from collections import defaultdict, Counter
 from tqdm import tqdm
 import random
-
-import numpy as np
-from iterstrat.ml_stratifiers import MultilabelStratifiedShuffleSplit
 import albumentations as A
 import cv2
 import numpy as np
@@ -224,7 +224,6 @@ for fname in train_fnames:
         safe_img_to_hits[fname] = hits
 
 # 희귀클래스 증강대상 이미지
-# aug_img_set = safe_img_set - top_img_set
 aug_img_set = safe_img_set
 
 # 중위클래스 조건부증강대상 이미지(희귀클래스와 함께 등장하지 않은 이미지들만 대상)
@@ -316,11 +315,11 @@ print("cls_to_catid sample:", list(cls_to_catid.items())[:5], "...")
 # 증강시작 ===================================================
 # train: 증강
 AUG_PREFIXES = ("rare_", "mid_")
-for prefix in AUG_PREFIXES:
-    for p in IMG_DIR0.glob(f"{prefix}*.png"):
-        p.unlink()
-    for p in IMG_DIR0.glob(f"{prefix}*.txt"):
-        p.unlink()
+# for prefix in AUG_PREFIXES:
+#     for p in IMG_DIR0.glob(f"{prefix}*.png"):
+#         p.unlink()
+#     for p in LBL_DIR0.glob(f"{prefix}*.txt"):
+#         p.unlink()
 
 attempted = 0   # 증강 시도 수
 saved = 0       # 실제 저장 수
@@ -525,24 +524,24 @@ for txt_path in LABEL_DIR1.glob("*.txt"):
             cls_id = int(line.split()[0])  # YOLO format: cls cx cy w h
             class_freq[cls_id] += 1
 
-# debug count -----
-print("\n[Class-wise augmentation summary]")
-print("cid | name | orig_bbox_cnt | aug_bbox_cnt") 
-# 원본bbox갯수,증강이미지중 클래스등장이미지수, 증강으로 추가된 bbox수
-check_list = sorted(set(rare_safe_set) | set(mid_class_set))
-for cid in check_list:
-    cname = categoryid_to_name.get(cid, "UNK")
-    orig_cnt = class_count[cid]
-    aug_box_cnt = aug_bbox_per_class[cid] 
+# # debug count -----
+# print("\n[Class-wise augmentation summary]")
+# print("cid | name | orig_bbox_cnt | aug_bbox_cnt") 
+# # 원본bbox갯수,증강이미지중 클래스등장이미지수, 증강으로 추가된 bbox수
+# check_list = sorted(set(rare_safe_set) | set(mid_class_set))
+# for cid in check_list:
+#     cname = categoryid_to_name.get(cid, "UNK")
+#     orig_cnt = class_count[cid]
+#     aug_box_cnt = aug_bbox_per_class[cid] 
     
-    # 증강된 것만 출력하거나, 원래 개수가 적은 것 위주로 출력
-    if orig_cnt < 50 or aug_box_cnt > 0:
-         print(
-            f"{cid:<6d} | {cname[:20]:<20s} | "
-            f"{orig_cnt:4d} | "
-            f"{aug_box_cnt:6d}"
-        )
-# -----
+#     # 증강된 것만 출력하거나, 원래 개수가 적은 것 위주로 출력
+#     if orig_cnt < 50 or aug_box_cnt > 0:
+#          print(
+#             f"{cid:<6d} | {cname[:20]:<20s} | "
+#             f"{orig_cnt:4d} | "
+#             f"{aug_box_cnt:6d}"
+#         )
+# # -----
 
 print("\n=== Class frequency (bbox count) ===")
 for cls_id, cnt in sorted(class_freq.items(), key=lambda x: x[1], reverse=True):
@@ -560,6 +559,22 @@ for cid in sorted(rare_safe_set):
         f"{categoryid_to_name.get(cid, 'UNKNOWN'):<20} : "
         f"{class_freq.get(cls, 0)} bboxes"
     )
+
+# png/txt 1:1 일치체크
+IMG_DIR = Path("yolo_dataset_aug/images/train")
+LBL_DIR = Path("yolo_dataset_aug/labels/train")
+
+img_stems = {p.stem for p in IMG_DIR.glob("*.png")}
+lbl_stems = {p.stem for p in LBL_DIR.glob("*.txt")}
+only_img = sorted(img_stems - lbl_stems)
+only_lbl = sorted(lbl_stems - img_stems)
+
+print(f"\nonly image: {len(only_img)}")
+for s in only_img[:20]:
+    print("  ", s)
+print(f"only label: {len(only_lbl)}")
+for s in only_lbl[:20]:
+    print("  ", s)
 
 yaml_path = V1_ROOT / "dataset.yaml"
 assert yaml_path.exists(), "dataset.yaml 이 없습니다. split_yolo.py를 먼저 실행하세요."

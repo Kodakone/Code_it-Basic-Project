@@ -1,31 +1,39 @@
-# Python-generated files
+# --- Python & OS Basics ---
 __pycache__/
 *.py[oc]
-*.pyc
 build/
 dist/
 wheels/
 *.egg-info
+.DS_Store
+Thumbs.db
 
-# Virtual environments
+# --- Virtual Environments ---
 .venv
-.env
-
-# cache / intermediate files
-cache/
-*.cache
-*.jsonl
-
-# env (local only)
 .env
 .env.*
 !.env.example
 
-# Data 원본 (local only) < data/** 폴더 자체는 유지하되 내부 파일만 무시
+# --- IDE Settings (협업 시 개인 설정 파일 제외) ---
+.vscode/
+.idea/
+
+# --- Logs & Cache ---
+logs/
+*.log
+wandb/
+cache/
+*.cache
+*.jsonl
+
+# --- Data Management (가장 중요) ---
 data/**/*
-!data/README_data.md
+!data/*.md
 !data/raw/
-!data/yolo_dataset/
-!data/yolo_dataset_aug/
-!**/.gitkeep
+data/yolo_dataset/
+data/yolo_dataset_aug/
+
+# --- YOLO Outputs ---
 runs/
+*.pt
+*.onnx

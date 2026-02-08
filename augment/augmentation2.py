@@ -155,7 +155,7 @@ aug_tf = A.Compose(
             scale=(0.90, 1.10),       # ±10%
             rotate=(-10, 10),         # ±10도
             translate_percent=None,   # 이동은 안 함 (원하면 추가 가능)
-            p=0.7                     # affine 적용 확률(원하면 1.0으로)
+            p=0.7                     # affine 적용 확률
         ),
         A.RandomBrightnessContrast(
             brightness_limit=0.10,    # ±10%
@@ -163,11 +163,9 @@ aug_tf = A.Compose(
             p=0.8
         ),
         A.GaussianBlur(
-            blur_limit=(3, 3),        # 매우 약하게 (3x3 고정)
-            p=0.1                    # blur 10% 확률
+            blur_limit=(3, 9),        # 커널 크기를 3, 5, 7, 9 중 랜덤 선택
+            p=0.3                     # blur 30% 확률
         ),
-        # 또는 blur를 조금 더 자연스럽게(약하게) 하고 싶으면 아래로 교체 가능:
-        # A.Blur(blur_limit=3, p=0.01),
     ],
     bbox_params=bbox_params,
 )

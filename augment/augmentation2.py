@@ -13,6 +13,7 @@ import albumentations as A
 import cv2
 import numpy as np
 from tqdm import tqdm
+import math
 
 from dataloader.dataset_load import CACHE_DIR, DATA_ROOT  # 윗줄들과 순서바뀌면 에러
 
@@ -293,7 +294,7 @@ MAX_AUG_PER_IMAGE_RARE_Q2 = 3  # 6~9회 클래스용
 MAX_AUG_PER_IMAGE_MID = 2  # cond_mid용
 TARGET_RARE_BBOX = 10  # 희귀 클래스 현재 bbox 개수 < n이면 증강허용
 TARGET_MID_BBOX = 18  # 중위 클래스 현재 bbox 개수 >= n이면 증강필요없음
-
+MAX_RARE_BBOX = math.ceil(1.5 * TARGET_RARE_BBOX)  # 스필오버 방지
 
 def all_targets_met(cur, target):
     return all(cur[c] >= t for c, t in target.items())
@@ -482,6 +483,14 @@ for fname in tqdm(sorted(train_fnames), desc="TRAIN preprocess"):
                 (cid in rare_safe_set and cur_bbox_count[cid] < target_bbox_count[cid])
                 for cid in final_catids_set
             ):
+                continue
+            
+            # rare spillover cap
+            overcap_rare = {
+                cid for cid in (final_catids_set & rare_safe_set)
+                if cur_bbox_count[cid] >= MAX_RARE_BBOX
+            }
+            if overcap_rare:
                 continue
 
             # 3351 cap 초과해 실제 저장 실패수 파악

@@ -1,4 +1,3 @@
-# ruff: noqa: E402
 import sys
 from pathlib import Path
 
@@ -191,7 +190,7 @@ for fname, target in targets_by_filename.items():
     for label in target["labels"]:
         class_count[int(label)] += 1
 
-target_freqs = {3, 6, 8, 9}
+target_freqs = {3, 6, 8}
 top_min = 150
 mid_min, mid_max = 5, 45
 always_with_3351 = {
@@ -265,7 +264,7 @@ print("aug_img_set:", len(aug_img_set))
 print("cond_mid_img_set:", len(cond_mid_img_set))
 
 # 증강횟수 설정/계산함수  ----------------------------------
-FREQ_TO_AUG = {3: 6, 6: 3, 8: 2, 9: 2}  # ex. 3번등장->6번증강
+FREQ_TO_AUG = {3: 6, 6: 3, 8: 2}  # ex. 3번등장->6번증강
 COND_MID_AUG_NUM = 1  # 중위 클래스 조건부 증강 횟수
 
 

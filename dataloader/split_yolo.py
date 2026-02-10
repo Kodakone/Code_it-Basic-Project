@@ -38,15 +38,32 @@ def save_yolo_label(txt_path: Path, boxes_xyxy, cls_ids, img_w: int, img_h: int)
 
     lines = []
     for (x1, y1, x2, y2), c in zip(boxes_xyxy, cls_ids):
+        try:
+            x1, y1, x2, y2 = float(x1), float(y1), float(x2), float(y2)
+        except Exception:
+            continue
+        
+        # 너무 큰 이상치 제거
+        if max(abs(x1), abs(y1), abs(x2), abs(y2)) > 10000:
+            continue
+
+        # 좌표순서보정
+        if x2 < x1:
+            x1, x2 = x2, x1
+        if y2 < y1:
+            y1, y2 = y2, y1
+
         # clip
         x1 = max(0, min(x1, img_w - 1))
         y1 = max(0, min(y1, img_h - 1))
         x2 = max(0, min(x2, img_w - 1))
         y2 = max(0, min(y2, img_h - 1))
 
+        # 너무작은 박스제거
         bw = max(0.0, x2 - x1)
         bh = max(0.0, y2 - y1)
-        if bw <= 0 or bh <= 0:
+        
+        if bw <= 1.0 or bh <= 1.0:
             continue
 
         cx = x1 + bw / 2.0

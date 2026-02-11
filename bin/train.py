@@ -50,7 +50,7 @@ def train_single_model():
 
     model.train(
         data=str(yaml_file),
-        epochs=1,  # epoch 60
+        epochs=60,  # epoch 60
         imgsz=640,
         batch=8,  # local에 맞게 조정
         device=0,  # local에 맞게 조정 (GPU 번호)

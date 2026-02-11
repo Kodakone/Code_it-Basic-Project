@@ -40,7 +40,7 @@ def run_fine_tuning():
 
     model.train(
         data=str(yaml_file),
-        epochs=1,  # Train: 60 + Fine_Tuning: 20 ~ 40
+        epochs=60,  # Train: 60 + Fine_Tuning: 20 ~ 40
         imgsz=640,  # img size
         batch=8,  # batch (train.py와 동일하게)
         # 파인튜닝 옵션 - (기존 학습 지식 보호 선에서)

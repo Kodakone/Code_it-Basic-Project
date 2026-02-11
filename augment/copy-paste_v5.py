@@ -23,7 +23,37 @@ except Exception:
 # ============================================================
 # 0) 설정(필요한 것만 수정)
 # ============================================================
-random.seed(42)
+SEED = 42
+
+def set_global_seed(seed: int = 42) -> None:
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    random.seed(seed)
+    np.random.seed(seed)
+    try:
+        cv2.setRNGSeed(seed)
+    except Exception:
+        pass
+
+    try:
+        import torch
+        torch.manual_seed(seed)
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed(seed)
+            torch.cuda.manual_seed_all(seed)
+
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+
+        os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+        try:
+            torch.use_deterministic_algorithms(True)
+        except Exception:
+            pass
+    except Exception:
+        pass
+
+set_global_seed(SEED)
+
 
 # 배경(base)로 쓰면 안 되는 "금지 cat_id" (예: 3351 들어간 이미지는 base에서 제외)
 BAN_BASE_CIDS = {3351, 3483, 16548}

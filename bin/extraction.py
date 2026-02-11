@@ -17,6 +17,20 @@ load_dotenv(override=True)
 # 프로젝트 루트 계산
 project_root = Path(__file__).resolve().parent.parent
 
+# 텍스트 파일에서 카테고리 ID 로드
+TARGET_TXT_PATH = project_root / "bin" / "real_class_ids.txt"
+
+if TARGET_TXT_PATH.exists():
+    with open(TARGET_TXT_PATH, "r") as f:
+        # 각 줄을 읽어서 공백 제거 후 숫자가 있는 경우만 정수로 변환하여 리스트 생성
+        real_class_ids = [int(line.strip()) for line in f if line.strip().isdigit()]
+    print(
+        f"✅ {len(real_class_ids)}개의 카테고리를 {TARGET_TXT_PATH.name}에서 로드했습니다."
+    )
+else:
+    real_class_ids = []
+    print(f"🚨 {TARGET_TXT_PATH} 파일을 찾을 수 없습니다!")
+
 # .env에서 최신 모델 이름 가져오기
 target_name = os.getenv("TARGET_MODEL_NAME")
 
@@ -42,66 +56,6 @@ RESULT_DIR = project_root / "runs" / "result"
 RESULT_DIR.mkdir(parents=True, exist_ok=True)  # 결과 폴더 자동 생성
 
 OUTPUT_CSV = f"submission_{target_name}_WBF.csv"
-
-# 실재 카테고리 매핑 리스트 (순서 중요)
-real_class_ids = [
-    1900,
-    2483,
-    3351,
-    3483,
-    3544,
-    3743,
-    3832,
-    4543,
-    12081,
-    12247,
-    12778,
-    13395,
-    13900,
-    16232,
-    16262,
-    16548,
-    16551,
-    16688,
-    18147,
-    18357,
-    19232,
-    19552,
-    19607,
-    19861,
-    20014,
-    20238,
-    20877,
-    21325,
-    21771,
-    22074,
-    22347,
-    22362,
-    24850,
-    25367,
-    25438,
-    25469,
-    27733,
-    27777,
-    27926,
-    27993,
-    28763,
-    29345,
-    29451,
-    29667,
-    30308,
-    31863,
-    31885,
-    32310,
-    33009,
-    33208,
-    33880,
-    34597,
-    35206,
-    36637,
-    38162,
-    41768,
-]
 
 
 # ==========================================

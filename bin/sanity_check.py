@@ -13,10 +13,9 @@ sanity_check.py
 from __future__ import annotations
 
 import os
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, Tuple, List
+from typing import List, Optional, Tuple
 
 from dotenv import load_dotenv
 
@@ -24,6 +23,7 @@ try:
     import yaml  # PyYAML
 except Exception:  # pragma: no cover
     yaml = None
+
 
 # -----------------------------
 # Utils
@@ -177,48 +177,91 @@ def check_dataset_yaml(project_root: Path, yolo_path: Path) -> List[CheckResult]
         )
         return res
 
-    nc = data.get("nc", None)
+    # --- 수정된 로직 시작 ---
     names = data.get("names", None)
-    train = data.get("train", None)
-    val = data.get("val", None)
+    # nc가 없으면 names의 길이를 nc로 사용
+    nc = data.get("nc", len(names) if isinstance(names, (list, dict)) else None)
+    res.append(
+        CheckResult(
+            isinstance(nc, int),
+            "nc(클래스 수) 확인",
+            f"nc={nc!r}",
+            "nc는 정수여야 합니다.",
+        )
+    )
 
-    res.append(CheckResult(isinstance(nc, int), "nc(클래스 수) 확인", f"nc={nc!r}", "nc는 정수여야 합니다."))
-    if isinstance(names, list):
-        res.append(CheckResult(True, "names 리스트 확인", f"len(names)={len(names)}"))
-    else:
-        res.append(CheckResult(False, "names 리스트 확인", f"names={type(names).__name__}", "names가 리스트인지 확인하세요."))
-
-    # nc vs names 길이
-    if isinstance(nc, int) and isinstance(names, list):
+    # 해당 file list or dict 전부 되도록.
+    if isinstance(names, (list, dict)):
+        name_count = len(names)
         res.append(
             CheckResult(
-                ok=(len(names) == nc),
-                title="nc == len(names) 일치",
-                detail=f"nc={nc}, len(names)={len(names)}",
-                hint="이 값이 어긋나면 학습/추론에서 클래스 매핑이 꼬일 수 있어요.",
+                True, "names 형식 확인", f"{type(names).__name__} (len={name_count})"
             )
         )
 
-    # train/val 경로 존재 확인(문자열이면 상대/절대 모두 가능)
+        # nc와 names 길이 일치 여부
+        res.append(
+            CheckResult(
+                nc == name_count,
+                "nc == len(names) 일치",
+                f"nc={nc}, len(names)={name_count}",
+            )
+        )
+    else:
+        res.append(
+            CheckResult(
+                False,
+                "names 리스트/딕셔너리 확인",
+                f"names={type(names).__name__}",
+                "names 형식이 올바르지 않습니다.",
+            )
+        )
+
+    # 경로 확인 로직 개선
+    train_val_base = Path(
+        data.get("path", yolo_path)
+    )  # path 설정이 있으면 사용, 없으면 yolo_path 사용
+
     def _path_ok(pv) -> Tuple[bool, str]:
         if not pv:
             return False, "없음"
-        try:
-            p = Path(str(pv))
-            if not p.is_absolute():
-                p = (project_root / p).resolve()
-            return p.exists(), str(p)
-        except Exception:
-            return False, f"해석 불가: {pv!r}"
+        p = Path(str(pv))
+        # path 항목이 정의되어 있다면 그 기준으로 절대경로 생성
+        full_p = p if p.is_absolute() else (train_val_base / p)
+        return full_p.exists(), str(full_p)
 
-    ok_train, train_path = _path_ok(train)
-    ok_val, val_path = _path_ok(val)
-    res.append(CheckResult(ok_train, "train 경로 존재", train_path, "dataset.yaml의 train 경로를 확인하세요."))
-    res.append(CheckResult(ok_val, "val 경로 존재", val_path, "dataset.yaml의 val 경로를 확인하세요."))
+    ok_train, train_path = _path_ok(data.get("train"))
+    ok_val, val_path = _path_ok(data.get("val"))
+
+    res.append(
+        CheckResult(
+            ok_train,
+            "train 경로 존재",
+            train_path,
+            "dataset.yaml의 train 경로를 확인하세요.",
+        )
+    )
+    res.append(
+        CheckResult(
+            ok_val, "val 경로 존재", val_path, "dataset.yaml의 val 경로를 확인하세요."
+        )
+    )
 
     # labels/images 폴더 구조 확인
-    res.append(CheckResult((yolo_path / "images" / "train").exists(), "images/train 존재", str(yolo_path / "images" / "train")))
-    res.append(CheckResult((yolo_path / "labels" / "train").exists(), "labels/train 존재", str(yolo_path / "labels" / "train")))
+    res.append(
+        CheckResult(
+            (yolo_path / "images" / "train").exists(),
+            "images/train 존재",
+            str(yolo_path / "images" / "train"),
+        )
+    )
+    res.append(
+        CheckResult(
+            (yolo_path / "labels" / "train").exists(),
+            "labels/train 존재",
+            str(yolo_path / "labels" / "train"),
+        )
+    )
 
     return res
 
@@ -227,7 +270,14 @@ def check_labels(yolo_path: Path) -> List[CheckResult]:
     res: List[CheckResult] = []
     lbl_dir = yolo_path / "labels" / "train"
     if not lbl_dir.exists():
-        res.append(CheckResult(False, "labels/train 라벨 폴더", str(lbl_dir), "YOLO_PATH가 올바른지 확인하세요."))
+        res.append(
+            CheckResult(
+                False,
+                "labels/train 라벨 폴더",
+                str(lbl_dir),
+                "YOLO_PATH가 올바른지 확인하세요.",
+            )
+        )
         return res
 
     txts = list(lbl_dir.glob("*.txt"))
@@ -275,11 +325,17 @@ def check_labels(yolo_path: Path) -> List[CheckResult]:
         )
     )
     if max_cls >= 0:
-        res.append(CheckResult(True, "라벨 내 최대 cls(상위 2000개 검사)", f"max_cls={max_cls}"))
+        res.append(
+            CheckResult(
+                True, "라벨 내 최대 cls(상위 2000개 검사)", f"max_cls={max_cls}"
+            )
+        )
     return res
 
 
-def check_real_class_ids(project_root: Path, expected_nc: Optional[int]) -> List[CheckResult]:
+def check_real_class_ids(
+    project_root: Path, expected_nc: Optional[int]
+) -> List[CheckResult]:
     res: List[CheckResult] = []
     p = project_root / "bin" / "real_class_ids.txt"
     if not p.exists():
@@ -310,14 +366,39 @@ def check_real_class_ids(project_root: Path, expected_nc: Optional[int]) -> List
 def check_models(project_root: Path, target_name: str) -> List[CheckResult]:
     res: List[CheckResult] = []
     if not target_name:
-        res.append(CheckResult(False, "모델 체크", "TARGET_MODEL_NAME이 비어있음", "train.py를 먼저 실행해 .env를 업데이트하세요."))
+        res.append(
+            CheckResult(
+                False,
+                "모델 체크",
+                "TARGET_MODEL_NAME이 비어있음",
+                "train.py를 먼저 실행해 .env를 업데이트하세요.",
+            )
+        )
         return res
 
-    ft = project_root / "runs" / "fine_tuning" / f"{target_name}_FT" / "weights" / "best.pt"
+    ft = (
+        project_root
+        / "runs"
+        / "fine_tuning"
+        / f"{target_name}_FT"
+        / "weights"
+        / "best.pt"
+    )
     tr = project_root / "runs" / "train" / target_name / "weights" / "best.pt"
 
-    res.append(CheckResult(ft.exists(), "Fine-tuning best.pt", str(ft), "fine_tuning.py 실행 여부/경로 확인"))
-    res.append(CheckResult(tr.exists(), "Train best.pt", str(tr), "train.py 실행 여부/경로 확인"))
+    res.append(
+        CheckResult(
+            ft.exists(),
+            "Fine-tuning best.pt",
+            str(ft),
+            "fine_tuning.py 실행 여부/경로 확인",
+        )
+    )
+    res.append(
+        CheckResult(
+            tr.exists(), "Train best.pt", str(tr), "train.py 실행 여부/경로 확인"
+        )
+    )
 
     # 실제 추론에서 어떤 모델이 선택될지 요약
     if ft.exists():
@@ -330,7 +411,11 @@ def check_models(project_root: Path, target_name: str) -> List[CheckResult]:
         chosen = None
         why = "best.pt를 찾지 못함"
 
-    res.append(CheckResult(bool(chosen), "추론에 사용될 모델", str(chosen) if chosen else "없음", why))
+    res.append(
+        CheckResult(
+            bool(chosen), "추론에 사용될 모델", str(chosen) if chosen else "없음", why
+        )
+    )
     return res
 
 
@@ -338,10 +423,19 @@ def check_test_images(project_root: Path) -> List[CheckResult]:
     res: List[CheckResult] = []
     d = project_root / "data" / "raw" / "test_images"
     ok = d.exists()
-    res.append(CheckResult(ok, "test_images 폴더", str(d), "test.py/extraction.py가 이 경로를 사용합니다."))
+    res.append(
+        CheckResult(
+            ok,
+            "test_images 폴더",
+            str(d),
+            "test.py/extraction.py가 이 경로를 사용합니다.",
+        )
+    )
     if ok:
         pngs = list(d.glob("*.png"))
-        res.append(CheckResult(len(pngs) > 0, "test_images PNG 개수", f"{len(pngs)} files"))
+        res.append(
+            CheckResult(len(pngs) > 0, "test_images PNG 개수", f"{len(pngs)} files")
+        )
     return res
 
 
@@ -351,9 +445,22 @@ def check_ultralytics_and_gpu() -> List[CheckResult]:
     try:
         import ultralytics  # type: ignore
 
-        res.append(CheckResult(True, "ultralytics 설치", f"version={getattr(ultralytics, '__version__', 'unknown')}"))
+        res.append(
+            CheckResult(
+                True,
+                "ultralytics 설치",
+                f"version={getattr(ultralytics, '__version__', 'unknown')}",
+            )
+        )
     except Exception as e:
-        res.append(CheckResult(False, "ultralytics 설치", f"import 실패: {e}", "pip install ultralytics"))
+        res.append(
+            CheckResult(
+                False,
+                "ultralytics 설치",
+                f"import 실패: {e}",
+                "pip install ultralytics",
+            )
+        )
         return res
 
     # torch / cuda
@@ -361,12 +468,34 @@ def check_ultralytics_and_gpu() -> List[CheckResult]:
         import torch  # type: ignore
 
         cuda = torch.cuda.is_available()
-        res.append(CheckResult(True, "torch 설치", f"torch={getattr(torch, '__version__', 'unknown')}"))
-        res.append(CheckResult(cuda, "CUDA 사용 가능", f"cuda_available={cuda}", "train.py에서 device=0 사용. GPU 없으면 device='cpu'로 변경 필요"))
+        res.append(
+            CheckResult(
+                True, "torch 설치", f"torch={getattr(torch, '__version__', 'unknown')}"
+            )
+        )
+        res.append(
+            CheckResult(
+                cuda,
+                "CUDA 사용 가능",
+                f"cuda_available={cuda}",
+                "train.py에서 device=0 사용. GPU 없으면 device='cpu'로 변경 필요",
+            )
+        )
         if cuda:
-            res.append(CheckResult(True, "CUDA device count", f"count={torch.cuda.device_count()}"))
+            res.append(
+                CheckResult(
+                    True, "CUDA device count", f"count={torch.cuda.device_count()}"
+                )
+            )
     except Exception as e:
-        res.append(CheckResult(False, "torch 설치", f"import 실패: {e}", "GPU 학습을 안 하면 torch는 없어도 되지만, ultralytics 내부에서 사용합니다."))
+        res.append(
+            CheckResult(
+                False,
+                "torch 설치",
+                f"import 실패: {e}",
+                "GPU 학습을 안 하면 torch는 없어도 되지만, ultralytics 내부에서 사용합니다.",
+            )
+        )
     return res
 
 
@@ -454,7 +583,9 @@ def main() -> int:
 
     # Quick exit code: if any critical checks fail
     critical_fail = any(
-        (not r.ok) and r.title in [
+        (not r.ok)
+        and r.title
+        in [
             ".env 존재 여부",
             "YOLO_PATH 설정",
             "YOLO_PATH 경로 존재",
@@ -463,7 +594,9 @@ def main() -> int:
     )
 
     if critical_fail:
-        print("❌ 필수 항목이 실패했습니다. 위 힌트를 참고해서 경로/환경변수를 먼저 수정하세요.")
+        print(
+            "❌ 필수 항목이 실패했습니다. 위 힌트를 참고해서 경로/환경변수를 먼저 수정하세요."
+        )
         return 2
 
     print("완료! 위에서 ❌로 표시된 항목만 순서대로 해결하면 됩니다.")

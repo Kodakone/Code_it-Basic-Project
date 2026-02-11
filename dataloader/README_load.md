@@ -12,6 +12,8 @@ LOG_FILE_PATH="D:/Code_it/Basic Project/data/raw"
 ↓\
 데이터 분할 & .yaml 생성 split_yolo\
 ↓
+
+
 이후, augment/ 내 증강들 실행. (필요한 증강들 선택하여 사용. 순서 상관 X)
 1. 전체 데이터 증강: run_general_augmenataion.py
 2. 희소 class 데이터 증강: augmentation2.py

@@ -22,3 +22,5 @@ TARGET_MODEL_NAME='trained_yolo11m'
 모델 시각화 테스트 test.py\
 ↓\
 모델 csv 파일 추출 extration.py
+
+실행 중 이상 상황 생겼을 경우, sanity_check.py로 파악

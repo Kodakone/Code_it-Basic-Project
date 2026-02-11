@@ -1,17 +1,22 @@
-import sys
 import json
-from pathlib import Path
+import sys
 from collections import defaultdict
+from pathlib import Path
 
 # 레포 루트를 sys.path에 먼저 추가
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
-import cv2
-from tqdm import tqdm
+import cv2  # noqa: E402
+from tqdm import tqdm  # noqa: E402
 
-from dataloader.dataset_load import TRAIN_IMG_DIR, ANNOTATION_DIR, CACHE_DIR, DATA_ROOT
-from dataloader.general_augmentation import build_general_augmentation
+from dataloader.dataset_load import (  # noqa: E402
+    ANNOTATION_DIR,
+    CACHE_DIR,
+    DATA_ROOT,
+    TRAIN_IMG_DIR,
+)
+from dataloader.general_augmentation import build_general_augmentation  # noqa: E402
 
 IMG_EXTS = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
 
@@ -83,7 +88,9 @@ def xyxy_to_yolo_line(x1, y1, x2, y2, cls, img_w, img_h):
 
 def save_yolo_label(label_path: Path, boxes_xyxy, cls_ids, img_w, img_h):
     label_path.parent.mkdir(parents=True, exist_ok=True)
-    lines = [xyxy_to_yolo_line(*b, c, img_w, img_h) for b, c in zip(boxes_xyxy, cls_ids)]
+    lines = [
+        xyxy_to_yolo_line(*b, c, img_w, img_h) for b, c in zip(boxes_xyxy, cls_ids)
+    ]
     label_path.write_text("\n".join(lines), encoding="utf-8")
 
 
@@ -94,9 +101,29 @@ def main():
     OUT_IMG_DIR.mkdir(parents=True, exist_ok=True)
     OUT_LBL_DIR.mkdir(parents=True, exist_ok=True)
 
+    # 전체 Train 증강 X -> split된 train만 증강
+    SPLIT_TRAIN_DIR = Path(DATA_ROOT).parent / "yolo_dataset" / "images" / "train"
+
     aug_tf = build_general_augmentation()
 
-    img_paths = sorted([p for p in TRAIN_IMG_DIR.iterdir() if p.suffix.lower() in IMG_EXTS])
+    # 전체 raw 폴더가 아니라, split된 폴더 안의 파일 리스트
+    if not SPLIT_TRAIN_DIR.exists():
+        raise FileNotFoundError(
+            f"Train split 폴더를 찾을 수 없습니다: {SPLIT_TRAIN_DIR}"
+        )
+
+    # split된 폴더에 있는 파일 이름들만 추출
+    train_filenames = {
+        p.name for p in SPLIT_TRAIN_DIR.iterdir() if p.suffix.lower() in IMG_EXTS
+    }
+
+    # 원본 이미지 경로(TRAIN_IMG_DIR) 중에서 split 리스트에 포함된 것만 필터링
+    img_paths = sorted(
+        [p for p in TRAIN_IMG_DIR.iterdir() if p.name in train_filenames]
+    )
+    print(
+        f"[INFO] 전체 이미지 중 Train Split에 해당하는 {len(img_paths)}개만 증강을 시작합니다."
+    )
 
     gt_cache_path = CACHE_DIR / "targets_by_filename.json"
     if not gt_cache_path.exists():
@@ -159,8 +186,8 @@ def main():
                 skipped += 1
                 continue
 
-            out_img = OUT_IMG_DIR / f"{stem}_aug{k+1}{ext}"
-            out_lbl = OUT_LBL_DIR / f"{stem}_aug{k+1}.txt"
+            out_img = OUT_IMG_DIR / f"{stem}_aug{k + 1}{ext}"
+            out_lbl = OUT_LBL_DIR / f"{stem}_aug{k + 1}.txt"
 
             # 덮어쓰기 방지
             if out_img.exists() or out_lbl.exists():

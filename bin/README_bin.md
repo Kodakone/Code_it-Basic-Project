@@ -13,12 +13,12 @@ TARGET_MODEL_NAME='trained_yolo11m'
 
 이후, 다음 순서대로 진행.
 
-경로 체크(data_precheck.py)
-↓
-모델 훈련 train.py
-↓
-파인 튜닝 fine_tuning.py (필요시)
-↓
-모델 시각화 테스트 test.py
-↓
+경로 체크(data_precheck.py)\
+↓\
+모델 훈련 train.py\
+↓\
+파인 튜닝 fine_tuning.py (필요시)\
+↓\
+모델 시각화 테스트 test.py\
+↓\
 모델 csv 파일 추출 extration.py

@@ -78,7 +78,7 @@ albumentations>= 2.0.8\
 opencv-python>=	4.13.0.92\
 tqdm>= 4.67.3\
 iterative-stratification>= 0.1.9\
-ensemble-boxes>= 1.0.9\	
+ensemble-boxes>= 1.0.9
 >
 
 + 해당 github fork 후,
@@ -99,6 +99,9 @@ data/ 폴더에 raw data 기입(프로젝트 원본 데이터) 이후, README_da
 - [📄 보고서 다운로드](https://github.com/Kodakone/Code_it-Basic-Project/raw/main/%EC%B4%88%EA%B8%89%20%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8%20%EB%B3%B4%EA%B3%A0%EC%84%9C_3%ED%8C%80.pdf)
   
 - [📄 발표자료 다운로드](https://github.com/Kodakone/Code_it-Basic-Project/raw/main/3%ED%8C%80%20%EC%B5%9C%EC%A2%85%EB%B0%9C%ED%91%9C%EC%9E%90%EB%A3%8C.pdf)
+
+<img width="951" height="206" alt="image" src="https://github.com/user-attachments/assets/c218bc18-5970-4458-9423-f611f3d73665" />
+
 
 ---------------------------------------
 ## **협업 내용**

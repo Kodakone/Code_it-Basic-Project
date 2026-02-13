@@ -69,17 +69,17 @@ BASIC PROJECT
 + Required package version
 
 > Python = 3.13.9\
-
-torch>=	2.6.0
-ultralytics>=	8.4.14
-numpy>= 2.3.5	
-pandas>= 3.0.0	
-scikit-learn>= 1.8.0	
-albumentations>= 2.0.8	
-opencv-python>=	4.13.0.92	
-tqdm>= 4.67.3	
-iterative-stratification>= 0.1.9	
-ensemble-boxes>= 1.0.9	
+torch>=	2.6.0\
+ultralytics>=	8.4.14\
+numpy>= 2.3.5\
+pandas>= 3.0.0\
+scikit-learn>= 1.8.0\
+albumentations>= 2.0.8\
+opencv-python>=	4.13.0.92\
+tqdm>= 4.67.3\
+iterative-stratification>= 0.1.9\
+ensemble-boxes>= 1.0.9\	
+>
 
 + 해당 github fork 후,
 

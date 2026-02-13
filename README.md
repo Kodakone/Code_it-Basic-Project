@@ -118,7 +118,7 @@ data/ 폴더에 raw data 기입(프로젝트 원본 데이터) 이후, README_da
 [[https://woolly-farm-a38.notion.site/_3-_-30627611ae6e803f84f7fcda0ceca9f7]](https://woolly-farm-a38.notion.site/_3-_-30627611ae6e803f84f7fcda0ceca9f7)\
 [[https://www.notion.so/3-2f7d6346486581c087b3e93e647580cd](https://www.notion.so/3-2f7d6346486581c087b3e93e647580cd?source=copy_link)]
 
-**Model Architect & Experimentation Lead:신민수, 윤성현**
+**Model Architect & Experimentation Lead:신현수, 윤성현**
 - 딥러닝 모델을 설계하고 아키텍처를 결정
 - 다양한 실험을 주도하고, 하이퍼파라미터 튜닝 및 모델 성능 평가를 담당
 - 협업 일지\

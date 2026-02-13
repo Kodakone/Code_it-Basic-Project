@@ -40,13 +40,19 @@ def run_fine_tuning():
 
     model.train(
         data=str(yaml_file),
-        epochs=40,  # Train: 60 + Fine_Tuning: 20 ~ 40
+        epochs=20,  # Train: 60 + Fine_Tuning: 20 ~ 40
         imgsz=640,  # img size
         batch=8,  # batch (train.py와 동일하게)
         # 파인튜닝 옵션 - (기존 학습 지식 보호 선에서)
         optimizer="AdamW",
-        lr0=0.0005,  # 학습률 아주 낮게 (0.01 -> 0.0005)
-        mosaic=0.5,  # 증강이 강력하다면, 모자이크는 약하게
+        lr0=0.00005,  # 학습률 아주 낮게
+        lrf=0.01,
+        cos_lr=True,
+        # 학습 도중 이미지를 섞거나(Mosaic) 자르는(Mixup) 기능은 끕니다.
+        # 온전한 알약 모양을 그대로 보여주는 게 중요합니다.
+        mosaic=0.0,  # 👈 끄기!
+        mixup=0.0,  # 👈 끄기!
+        copy_paste=0.0,  # 👈 끄기!
         # [Output 설정] 결과를 따로 저장하는 부분
         # project: '.../Basic Project/runs/fine_tuning' 폴더로 고정
         project=str(project_root / "runs" / "fine_tuning"),  # 결과가 저장될 상위 폴더

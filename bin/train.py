@@ -52,13 +52,35 @@ def train_single_model():
         data=str(yaml_file),
         epochs=60,  # epoch 60
         imgsz=640,
-        batch=8,  # local에 맞게 조정
+        batch=16,  # local에 맞게 조정
         device=0,  # local에 맞게 조정 (GPU 번호)
         workers=2,  # local에 맞게 조정
+        dropout=0.1,
+        patience=15,  # 조기 종료 대기
         augment=True,
         project=str(save_dir),
         name=custom_name,  # 1번 작업 후, 선두 이름 변경해야 따로 저장
         exist_ok=True,  # 기존 폴더가 있어도 그 안에 덮어쓰거나 이어서 저장
+        # --- Hyperparameter Values 적용 ---
+        lr0=0.01,
+        lrf=0.01,
+        momentum=0.85437,
+        weight_decay=0.00026,
+        warmup_epochs=2.98601,
+        warmup_momentum=0.93041,
+        box=7.10091,  # Box Loss 가중치
+        cls=0.51753,  # Class Loss 가중치
+        dfl=1.50138,  # DFL Loss 가중치
+        hsv_h=0.02615,
+        hsv_s=0.68715,
+        hsv_v=0.41488,
+        degrees=0.01027,
+        translate=0.11212,
+        scale=0.49992,
+        fliplr=0.48013,
+        mosaic=1.0,  # 모자이크 증강 100% 적용
+        mixup=0.01237,  # 믹스업 적용
+        close_mosaic=9,  # 종료 9에포크 전 모자이크 해제
     )
 
     # 4. 학습 완료 후 .env 파일 업데이트

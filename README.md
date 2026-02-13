@@ -115,7 +115,7 @@ data/ 폴더에 raw data 기입(프로젝트 원본 데이터) 이후, README_da
 - 데이터 수집, 정제 및 전처리를 담당하고 데이터 파이프라인을 구축
 - 협업 일지\
 [[https://woolly-farm-a38.notion.site/_3-_-30627611ae6e803f84f7fcda0ceca9f7]](https://woolly-farm-a38.notion.site/_3-_-30627611ae6e803f84f7fcda0ceca9f7)\
-[https://www.notion.so/3-2f7d6346486581c087b3e93e647580cd]
+[[https://www.notion.so/3-2f7d6346486581c087b3e93e647580cd](https://www.notion.so/3-2f7d6346486581c087b3e93e647580cd?source=copy_link)]
 
 **Model Architect & Experimentation Lead:신민수, 윤성현**
 - 딥러닝 모델을 설계하고 아키텍처를 결정

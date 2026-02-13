@@ -22,23 +22,38 @@ Code_it 7기 초급 프로젝트
 ---------------------------------------
 
 ##  **폴더 구조**
-> 데이터 Folder 구조 구성
+> 핵심 Folder 구조 구성
 
 ```
 BASIC PROJECT
-├── config/                       # 설정 파일: requirements, precommit 등 전부
+├── augment/                      # 증강 3가지 실행 (전체 증강 / 희소 class 증강 / 희소 Class Copy-Paste)
+│   ├── augmentation2.py            # 희소 class 증강
+│   ├── copy-paste_v5.py            # 희소 Class Copy-Paste (augment_target.txt에서 목표 선정)
+│   └── run_general_augmentation.py # 전체 증강
+├── bin/                          # 모델 훈련 및 테스트 시행. 
+│   ├── data_precheck.py            # 데이터 경로 check
+│   ├── extraction.py               # 모델 csv 파일 추출 (real_class_ids 에서 카테고리 ID 로드)
+│   ├── fine_tuning.py              # 파인 튜닝 시행 (Train 후 필요 시 사용)
+│   ├── optuna.py                   # 최적 Hyperparameter 도출
+│   ├── README_bin.md               # 모델 훈련 / 테스트 사용 설명서
+│   ├── sanity_check.py             # 이상 상황 검사 
+│   ├── test.py                     # 모델 시각화 테스트
+│   └── train.py                    # 모델 훈련
 ├── data/                         # 데이터 모음 (git: x)
 │   ├── raw/                        # 원본 data 기입
-│   │    ├── train_images/            # train 이미지 (.png)
-│   │    ├── train_annotations/       # train annotation (.json)
-│   │    └── test_images/             # test 이미지 (.png)
-│   ├── yolo_dataset/               # YOLO data 원본 (.ymal)
-│   └── yolo_dataset_aug/           # 증강 data 기입 (원본 + 전체 + 희소 + Copy_Paste)
+│   │    ├── train_images/             # train 이미지 (.png)
+│   │    ├── train_annotations/        # train annotation (.json)
+│   │    └── test_images/              # test 이미지 (.png)
+│   ├── yolo_dataset/                # YOLO data 원본 (.ymal)                           < dataloader 파일 실행시 생성
+│   └── yolo_dataset_aug/            # 증강 data 기입 (원본 + 전체 + 희소 + Copy_Paste)  < dataloader 파일 실행시 생성
 ├── dataloader/                   # 데이터 불러오기 관련 folder
-│   ├── dataset_load.py             # .env 파일 경로 지정
-│   ├── mapping.py                  # image & annotation 매핑 (gt)
-│   └── split_yolo.py               # train / valid split & .ymal 변형 (gt)
+│   ├── dataset_load.py              # .env 파일 경로 지정
+│   ├── general_augmentation.py      # run_general_augmentation.py에서 데이터 끌어오는 용도. 실행 필요 X
+│   ├── mapping.py                   # image & annotation 매핑 (gt)
+│   ├── README_load.md               # dataloader 사용 설명서
+│   └── split_yolo.py                # train / valid split & .ymal 변형 (gt)
 ├── model/                        # Model (YOLOv11 nano ~ large)
+├── modelpt/                      # 실험 후 제출하였던 Model output
 ├── .gitignore
 ├── REAMME.py
 └── ...

@@ -69,21 +69,33 @@ BASIC PROJECT
 + Required package version
 
 > Python = 3.13.9\
-jupyter >= 1.1.1\
-matplotlib >= 3.10.8\
-numpy >= 2.4.1\
-pandas >= 3.0.0\
-scikit-learn >= 1.8.0\
-torch >= 2.10.0
 
+torch>=	2.6.0
+ultralytics>=	8.4.14
+numpy>= 2.3.5	
+pandas>= 3.0.0	
+scikit-learn>= 1.8.0	
+albumentations>= 2.0.8	
+opencv-python>=	4.13.0.92	
+tqdm>= 4.67.3	
+iterative-stratification>= 0.1.9	
+ensemble-boxes>= 1.0.9	
 
-설치 방법, 학습 및 테스트 실행 방법을 포함
++ 해당 github fork 후,
 
+data/ 폴더에 raw data 기입(프로젝트 원본 데이터) 이후, README_data.md 참고
+
+.env 생성 후 Data 경로 본인 Local에 맞게 수정하기
+
+이후, dataloader/ 폴더의 README_load.md 참고 후 file들 실행
+
+그리고, augment/ 폴더 파일 3가지 실행하여 증강 실행. 
+
+마지막으로, bin/ 폴더의 README_bin.md 참고하여 모델 훈련 및 테스트 실행 
 
 ---------------------------------------
 
-- **모델 설명 및 결과**:
-각 모델(From Scratch, VGGNet, ResNet)의 구현 내용, 학습 결과, 성능 비교 등
+- **모델 설명 및 결과**: []
 
 
 ---------------------------------------
@@ -91,16 +103,26 @@ torch >= 2.10.0
 
 > 팀원 역할
 
-**Project Manager:**
+**Project Manager:고대권**
 - 프로젝트의 협업 과정을 매니징하는 역할
 - 애자일/스프린트 방식으로 단위를 분리하고 회의를 주도
+- 협업 일지
+[https://github.com/Kodakone/Code_it_-/tree/main/협업일지(초급%20Project)]
 
-**Data Engineer:**
+
+**Data Engineer:곽민선, 이수민**
 - 데이터 수집, 정제 및 전처리를 담당하고 데이터 파이프라인을 구축
+- 협업 일지
+[https://woolly-farm-a38.notion.site/_3-_-30627611ae6e803f84f7fcda0ceca9f7]
+[https://www.notion.so/3-2f7d6346486581c087b3e93e647580cd]
 
-**Model Architect & Experimentation Lead:**
+**Model Architect & Experimentation Lead:신민수, 윤성현**
 - 딥러닝 모델을 설계하고 아키텍처를 결정
 - 다양한 실험을 주도하고, 하이퍼파라미터 튜닝 및 모델 성능 평가를 담당
+- 협업 일지
+[https://www.notion.so/Code_it-7-2f7a8c677cd18138bb2ae3fde4d54e96?source=copy_link
+신현수님의 워크스페이스 on Notion]
+[https://www.notion.so/2f7e2626fac580fda0d4e3c2407f94eb?source=copy_link]
 
 
 > 협업 과정
@@ -109,7 +131,5 @@ Weekdays
 + AM 9:00 ~ PM 6:00 Project 수행
 + PM 6:00 ~ PM 7:00 협업 일지 작성
 + PM 7:00 Pull Request Merge 수행
-
-
 
 ---------------------------------------

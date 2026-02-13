@@ -85,7 +85,23 @@ ensemble-boxes>= 1.0.9
 
 data/ 폴더에 raw data 기입(프로젝트 원본 데이터) 이후, README_data.md 참고
 
-.env 생성 후 Data 경로 본인 Local에 맞게 수정하기
+.env 생성 후 data 경로 본인 Local에 맞게 수정하기
+
+```
+# 개인 Dataset file 경로 지정 (예시)
+
+# raw data 절대 경로 [본인 경로 맞게 수정]
+LOG_FILE_PATH="D:/Code_it/Basic Project/data/raw"
+
+# YOLO dataset 절대 경로 [본인 경로 맞게 수정]
+YOLO_PATH = "D:/Code_it/Basic Project/data/yolo_dataset_aug"
+
+# runs/ 폴더 내 target 이름 (자동 갱신)
+TARGET_MODEL_NAME='train23_yolo11m'
+
+```
+
+
 
 이후, dataloader/ 폴더의 README_load.md 참고 후 file들 실행
 

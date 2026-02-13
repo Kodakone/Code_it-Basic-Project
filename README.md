@@ -96,9 +96,9 @@ data/ 폴더에 raw data 기입(프로젝트 원본 데이터) 이후, README_da
 ---------------------------------------
 
 - **모델 설명 및 결과**:
-- [보고서](초급 프로젝트 보고서_3팀.pdf)
+- [📄 보고서 다운로드](초급 프로젝트 보고서_3팀.pdf)
   
-- [발표자료]([https://github.com/유저/저장소/raw/main/manual.pdf?download=](https://github.com/Kodakone/Code_it-Basic-Project/raw/main/3%ED%8C%80%20%EC%B5%9C%EC%A2%85%EB%B0%9C%ED%91%9C%EC%9E%90%EB%A3%8C.pdf))
+- [📄 발표자료 다운로드](https://github.com/Kodakone/Code_it-Basic-Project/raw/main/3%ED%8C%80%20%EC%B5%9C%EC%A2%85%EB%B0%9C%ED%91%9C%EC%9E%90%EB%A3%8C.pdf)
 
 ---------------------------------------
 ## **협업 내용**
